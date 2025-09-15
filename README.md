@@ -15,10 +15,11 @@ The compiler is designed in three main parts:
 ### Execution  
 
 To run the compiler, use the following commands:  
+-- To run the code simply type the command: ``> make``
+-- The default run contains 'example_input.txt' as the input file
+-- To run on all the test cases run the command: ``> make testAll``
+-- In the 'Makefile' additional test cases can be added in the 'TEST_FILES' variable
 
-- To run the code, simply type:  
-  ```bash
-  make
 
 
 ### Example Programs  
