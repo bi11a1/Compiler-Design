@@ -5,7 +5,7 @@ A simple compiler for the **UTDLang programming language**, built as part of a c
 ### Grammar  
 The compiler follows the grammar rules of UTDLang (see diagram below):  
 
-*(insert grammar picture here)*  
+![UTDLang Grammar]([https://github.com/bi11a1/Bengali-Digit-Recognizer/blob/master/Demo%20Images/UTDLang%20Grammar.png](https://github.com/bi11a1/Compiler-Design/blob/main/Demo%20Images/UTDLang%20Grammar.png))
 
 ### Components  
 The compiler is designed in three main parts:  
