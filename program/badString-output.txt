@@ -1,0 +1,1 @@
+Error: class<x>: void main: Can not perform string - string. Line: ("test" - "other")

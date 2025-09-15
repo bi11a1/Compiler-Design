@@ -1,0 +1,2 @@
+Error: class<x>: void main: Can not assign bool to int. Line: int y = false;
+

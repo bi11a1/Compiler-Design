@@ -1,0 +1,2 @@
+Error: class<x>: int foo: Return type should be int instead of float. Line: return 1.0;
+

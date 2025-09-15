@@ -1,0 +1,2 @@
+Error: class<x>: void main: Decrement is not allowed on bool. Line: x--;
+

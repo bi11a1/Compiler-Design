@@ -1,0 +1,1 @@
+Error: class<x>: void main: Can not convert y to bool. Line: (~y)

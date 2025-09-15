@@ -1,0 +1,2 @@
+Error: class<x>: void main: Can not assign bool to float. Line: float y = false;
+

@@ -1,0 +1,1 @@
+Error: class<x>: int main: Function main should return a value of type int.

@@ -1,0 +1,2 @@
+Error: class<x>: void main: Can not reassign in final type. Line: y = 2;
+

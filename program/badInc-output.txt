@@ -1,0 +1,2 @@
+Error: class<x>: void main: Increment is not allowed on char. Line: y++;
+

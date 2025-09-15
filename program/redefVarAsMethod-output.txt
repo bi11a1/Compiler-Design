@@ -1,0 +1,1 @@
+Error: class<x>: Tried to redeclare method y().

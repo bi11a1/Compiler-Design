@@ -1,0 +1,391 @@
+
+import java_cup.runtime.*;
+
+terminal CLASS; //2
+terminal FINAL; //3
+terminal VOID; //4
+terminal INT; //5
+terminal CHAR; //6
+terminal BOOL; //7
+terminal FLOAT; //8
+terminal IF; //9
+terminal WHILE; //10
+terminal READ; //11
+terminal PRINT; //12
+terminal PRINTLINE; //13
+terminal RETURN; //14
+terminal ELSE; //15
+terminal TRUE; //16
+terminal FALSE; //17
+terminal LESSEQUAL; //18
+terminal GREATEREQUAL; //19
+terminal EQUALEQUAL; //20
+terminal NOTEQUAL; //21
+terminal LOGOR; //22
+terminal LOGAND; //23
+terminal PLUSPLUS; //24
+terminal MINUSMINUS; //25
+terminal OPENCURL; //26
+terminal CLOSECURL; //27
+terminal OPENSQR; //28
+terminal CLOSESQR; //29
+terminal OPENPAR; //30
+terminal CLOSEPAR; //31
+terminal EQUAL; //32
+terminal SEMICOLON; //33
+terminal QUESTION; //34
+terminal COLON; //35
+terminal COMMA; //36
+terminal TILDE; //37
+terminal MINUS; //38
+terminal PLUS; //39
+terminal MULTIPLY; //40
+terminal DIVIDE; //41
+terminal SMALLER; //42
+terminal GREATER; //43
+
+terminal float FLOATLIT; //44
+terminal int INTLIT; //45
+terminal char CHARLIT; //46
+terminal String STRLIT; //47
+terminal String ID; //48
+
+non terminal Program program;
+non terminal StmtList stmtList;
+non terminal Stmt stmt;
+non terminal IfEnd ifEnd;
+non terminal OptionalSemi optionalSemi;
+non terminal Expr expr;
+non terminal UnaryExpr unaryExpr;
+non terminal BinaryExpr binaryExpr;
+non terminal TernaryExpr ternaryExpr;
+non terminal Name name;
+non terminal PrintLineList printLineList;
+non terminal PrintList printList;
+non terminal ReadList readList;
+non terminal ArgList argList;
+non terminal Type type;
+non terminal ArgDecl argDecl;
+non terminal ArgDeclList argDeclList;
+non terminal ArgDeclS argDeclS;
+non terminal ReturnType returnType;
+non terminal MethodDecl methodDecl;
+non terminal OptionalExpr optionalExpr;
+non terminal OptionalFinal optionalFinal;
+non terminal FieldDecl fieldDecl;
+non terminal MethodDeclList methodDeclList;
+non terminal FieldDeclList fieldDeclList;
+non terminal MemberDecls memberDecls;
+
+precedence left COMMA;
+precedence right QUESTION;
+precedence left LOGOR;
+precedence left LOGAND;
+precedence left NOTEQUAL, EQUALEQUAL;
+precedence left SMALLER, GREATER, LESSEQUAL, GREATEREQUAL;
+precedence left PLUS, MINUS;
+precedence left MULTIPLY, DIVIDE;
+precedence right TILDE, PLUSPLUS, MINUSMINUS;
+
+program ::= CLASS ID:id OPENCURL memberDecls:m CLOSECURL
+                {: RESULT = new Program(id, m); :}
+            ;
+
+memberDecls ::= fieldDecl:f memberDecls:m
+                    {: RESULT = new MemberDecls(f, m); :}
+                | methodDeclList:m
+                    {: RESULT = new MemberDecls(m); :}
+                ;
+
+fieldDeclList ::= fieldDecl:f fieldDeclList:fl
+                    {: RESULT = fl.prependFieldDeclList(f); :}
+                | 
+                    {: RESULT = new FieldDeclList(); :}
+                ;
+
+methodDeclList ::= methodDecl:m methodDeclList:ml
+                    {: RESULT = ml.prependMethodDeclList(m); :}
+                | 
+                    {: RESULT = new MethodDeclList(); :}
+                ;
+
+fieldDecl ::= FINAL type:t ID:id optionalExpr:oe SEMICOLON
+                {: RESULT = new FieldDecl(true, t, id, oe); :}
+            | type:t ID:id optionalExpr:oe SEMICOLON
+                {: RESULT = new FieldDecl(false, t, id, oe); :}
+            | type:t ID:id OPENSQR INTLIT:i CLOSESQR SEMICOLON
+                {: RESULT = new FieldDecl(t, id, i); :}
+            ;
+
+optionalExpr ::= EQUAL expr:e
+                {: RESULT = new OptionalExpr(e); :}
+            | 
+                {: RESULT = new OptionalExpr(); :}
+            ;
+
+methodDecl ::= type:t ID:id OPENPAR argDeclS:a CLOSEPAR OPENCURL fieldDeclList:f stmtList:s CLOSECURL optionalSemi:o
+                {: RESULT = new MethodDecl(t, id, a, f, s, o); :}
+            | VOID ID:id OPENPAR argDeclS:a CLOSEPAR OPENCURL fieldDeclList:f stmtList:s CLOSECURL optionalSemi:o
+                {: RESULT = new MethodDecl(id, a, f, s, o); :}
+            ;
+
+optionalSemi ::= SEMICOLON
+                {: RESULT = new OptionalSemi(true); :}
+            | 
+                {: RESULT = new OptionalSemi(false); :}
+            ;
+
+type ::= INT
+            {: RESULT = new Type("int"); :}
+        | CHAR
+            {: RESULT = new Type("char"); :}
+        | BOOL
+            {: RESULT = new Type("bool"); :}
+        | FLOAT
+            {: RESULT = new Type("float"); :}
+        ;
+
+argDeclS ::= argDeclList:a
+                {: RESULT = new ArgDeclS(a); :}
+            |
+                {: RESULT = new ArgDeclS(); :}
+            ;
+
+argDeclList ::= argDecl:a COMMA argDeclList:al
+                {: RESULT = al.prependArgDeclList(a); :}
+            | argDecl:a
+                {: RESULT = new ArgDeclList(a); :}
+            ;
+
+argDecl ::= type:t ID:id
+                {: RESULT = new ArgDecl(t, id, false); :}
+            | type:t ID:id OPENSQR CLOSESQR
+                {: RESULT = new ArgDecl(t, id, true); :}
+            ;
+
+stmtList ::= stmt:s stmtList:sl
+                {:
+                    sl.prependStmtList(s);
+                    RESULT = sl;
+                :}
+            | 
+                {: RESULT = new StmtList(); :}
+            ;
+
+stmt ::= IF OPENPAR expr:e CLOSEPAR OPENCURL stmtList:s CLOSECURL ifEnd:i
+            {: 
+                Stmt stmt = new Stmt(1);
+                stmt.setExpr(e);
+                stmt.setStmtList(s);
+                stmt.setIfEnd(i);
+                RESULT = stmt;
+            :}
+        | WHILE OPENPAR expr:e CLOSEPAR stmt:s
+            {:
+                Stmt stmt = new Stmt(2);
+                stmt.setExpr(e);
+                stmt.setStmt(s);
+                RESULT = stmt;
+            :}
+        | name:n EQUAL expr:e SEMICOLON
+            {:
+                Stmt stmt = new Stmt(3);
+                stmt.setName(n);
+                stmt.setExpr(e);
+                RESULT = stmt;
+            :}
+        | READ OPENPAR readList:r CLOSEPAR SEMICOLON
+            {:
+                Stmt stmt = new Stmt(4);
+                stmt.setReadList(r);
+                RESULT = stmt;
+            :}
+        | PRINT OPENPAR printList:p CLOSEPAR SEMICOLON
+            {:
+                Stmt stmt = new Stmt(5);
+                stmt.setPrintList(p);
+                RESULT = stmt;
+            :}
+        | PRINTLINE OPENPAR printLineList:p CLOSEPAR SEMICOLON
+            {:
+                Stmt stmt = new Stmt(6);
+                stmt.setPrintLineList(p);
+                RESULT = stmt;
+            :}
+        | ID:id OPENPAR CLOSEPAR SEMICOLON
+            {:
+                Stmt stmt = new Stmt(7);
+                stmt.setId(id);
+                RESULT = stmt;
+            :}
+        | ID:id OPENPAR argList:a CLOSEPAR SEMICOLON
+            {:
+                Stmt stmt = new Stmt(8);
+                stmt.setId(id);
+                stmt.setArgList(a);
+                RESULT = stmt;
+            :}
+        | RETURN SEMICOLON
+            {:
+                Stmt stmt = new Stmt(9);
+                RESULT = stmt;
+            :}
+        | RETURN expr:e SEMICOLON
+            {:
+                Stmt stmt = new Stmt(10);
+                stmt.setExpr(e);
+                RESULT = stmt;
+            :}
+        | name:n PLUSPLUS SEMICOLON
+            {:
+                Stmt stmt = new Stmt(11);
+                stmt.setName(n);
+                RESULT = stmt;
+            :}
+        | name:n MINUSMINUS SEMICOLON
+            {:
+                Stmt stmt = new Stmt(12);
+                stmt.setName(n);
+                RESULT = stmt;
+            :}
+        | OPENCURL fieldDeclList:f stmtList:s CLOSECURL optionalSemi:o
+            {:
+                Stmt stmt = new Stmt(13);
+                stmt.setFieldDeclList(f);
+                stmt.setStmtList(s);
+                stmt.setOptionalSemi(o);
+                RESULT = stmt;
+            :}
+        ;
+        
+ifEnd ::= ELSE OPENCURL stmtList:s CLOSECURL
+            {: RESULT = new IfEnd(s); :}
+        |   
+            {: RESULT = new IfEnd(); :}
+        ;
+
+name ::= ID:id
+            {: RESULT = new Name(id); :}
+        | ID:id OPENSQR expr:e CLOSESQR
+            {: RESULT = new Name(id, e); :}
+        ;
+
+argList ::= expr:e COMMA argList:a
+                {: 
+                    a.prependArgList(e); 
+                    RESULT = a;
+                :}
+            | expr:e
+                {: 
+                    ArgList newArgList = new ArgList(); 
+                    newArgList.prependArgList(e);
+                    RESULT = newArgList; 
+                :}
+            ;
+
+readList ::= name:n COMMA readList:r
+                {: 
+                    r.prependReadList(n); 
+                    RESULT = r;
+                :}
+            | name:n
+                {:
+                    ReadList newReadList = new ReadList(n);
+                    RESULT = newReadList;
+                :}
+            ;
+
+printList ::= expr:e COMMA printList:p
+                {: 
+                     p.prependPrintList(e);
+                     RESULT = p;
+                :}
+            | expr:e
+                {:
+                    PrintList newPrintList = new PrintList(e);
+                    RESULT = newPrintList;
+                :}
+            ;
+
+printLineList ::= printList:p
+                    {:
+                        PrintLineList pline = new PrintLineList(p);
+                        RESULT = pline;
+                    :}
+                |   
+                    {:
+                        PrintLineList pline = new PrintLineList();
+                        RESULT = pline;
+                    :}
+                ;
+
+expr ::= name:n
+            {: RESULT =  new Expr(n); :}
+        | ID:id OPENPAR CLOSEPAR
+            {: 
+                ArgList emptyArgList = new ArgList();
+                RESULT =  new Expr(id, emptyArgList); 
+            :}
+        | ID:id OPENPAR argList:a CLOSEPAR
+            {: RESULT =  new Expr(id, a); :}
+        | INTLIT:i
+            {: RESULT =  new Expr(i); :}
+        | CHARLIT:c
+            {: RESULT =  new Expr(c); :}
+        | STRLIT:s
+            {: RESULT =  new Expr(s); :}
+        | FLOATLIT:f
+            {: RESULT =  new Expr(f); :}
+        | TRUE
+            {: RESULT =  new Expr(true); :}
+        | FALSE
+            {: RESULT =  new Expr(false); :}
+        | OPENPAR expr:e CLOSEPAR
+            {: RESULT =  new Expr(e); :}
+        | unaryExpr:u
+            {: RESULT =  new Expr(u); :}
+        | binaryExpr:b
+            {: RESULT =  new Expr(b); :}
+        | ternaryExpr:t
+            {: RESULT =  new Expr(t); :}
+        ;
+
+unaryExpr ::= TILDE expr:e
+                {: RESULT = new UnaryExpr("~", e); :}
+            | MINUS expr:e
+                {: RESULT =  new UnaryExpr("-", e); :}
+            | PLUS expr:e
+                {: RESULT =  new UnaryExpr("+", e); :}
+            | OPENPAR type:t CLOSEPAR expr:e
+                {: RESULT =  new UnaryExpr(t, e); :}
+            ;
+
+binaryExpr ::= expr:e1 MULTIPLY expr:e2
+                {: RESULT = new BinaryExpr(e1, "*", e2); :}
+            | expr:e1 DIVIDE expr:e2
+                {: RESULT = new BinaryExpr(e1, "/", e2); :}
+            | expr:e1 PLUS expr:e2
+                {: RESULT = new BinaryExpr(e1, "+", e2); :}
+            | expr:e1 MINUS expr:e2
+                {: RESULT = new BinaryExpr(e1, "-", e2); :}
+            | expr:e1 SMALLER expr:e2
+                {: RESULT = new BinaryExpr(e1, "<", e2); :}
+            | expr:e1 GREATER expr:e2
+                {: RESULT = new BinaryExpr(e1, ">", e2); :}
+            | expr:e1 LESSEQUAL expr:e2
+                {: RESULT = new BinaryExpr(e1, "<=", e2); :}
+            | expr:e1 GREATEREQUAL expr:e2
+                {: RESULT = new BinaryExpr(e1, ">=", e2); :}
+            | expr:e1 EQUALEQUAL expr:e2
+                {: RESULT = new BinaryExpr(e1, "==", e2); :}
+            | expr:e1 NOTEQUAL expr:e2
+                {: RESULT = new BinaryExpr(e1, "<>", e2); :}
+            | expr:e1 LOGOR expr:e2
+                {: RESULT = new BinaryExpr(e1, "||", e2); :}
+            | expr:e1 LOGAND expr:e2
+                {: RESULT = new BinaryExpr(e1, "&&", e2); :}
+            ;
+
+ternaryExpr ::= OPENPAR expr:e1 QUESTION expr:e2 COLON expr:e3 CLOSEPAR
+                {: RESULT = new TernaryExpr(e1, e2, e3); :}
+            ;

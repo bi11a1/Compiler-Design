@@ -1,0 +1,1 @@
+Error: class<x>: void main: Condition of ternary expression must be bool. Line: (1.0 ? true : false)

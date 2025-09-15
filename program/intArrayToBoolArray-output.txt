@@ -1,0 +1,2 @@
+Error: class<x>: int main: Can not assign array of type int into bool. Line: y = x;
+

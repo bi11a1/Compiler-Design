@@ -1,0 +1,1 @@
+Error: class<x>: void main: Undeclared nonExistFoo.

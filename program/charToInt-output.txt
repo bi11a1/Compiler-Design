@@ -1,0 +1,2 @@
+Error: class<x>: int main: Can not assign char to int. Line: int y = 'c';
+

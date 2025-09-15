@@ -1,0 +1,1 @@
+Error: class<x>: void main: Type mismatch on the operand of ternary operator. Line: (true ? 1.0 : false)

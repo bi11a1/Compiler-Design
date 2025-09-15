@@ -1,0 +1,2 @@
+Error: class<x>: void main: Can not assign float to int. Line: int i = 1.0;
+
