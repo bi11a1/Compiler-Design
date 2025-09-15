@@ -1,4 +1,4 @@
-Compiler Project Phase 3
+Execution
 ================
 -- To run the code simply type the command: ``> make``
 -- The default run contains 'example_input.txt' as the input file
